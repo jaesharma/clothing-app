@@ -9,5 +9,11 @@ module.exports = {
         endOfLine: "auto",
       },
     ],
+    "max-len": [
+      "error",
+      {
+        ignoreStrings: true,
+      },
+    ],
   },
 };

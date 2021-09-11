@@ -1,4 +1,4 @@
-import {createTheme} from "@shopify/restyle";
+import {createText, BaseTheme, createTheme} from "@shopify/restyle";
 
 const palette = {
   purpleLight: "#8C6FF7",
@@ -13,7 +13,7 @@ const palette = {
   white: "#F0F2F3",
 };
 
-const theme = createTheme({
+const theme: BaseTheme = {
   colors: {
     mainBackground: palette.white,
     cardPrimaryBackground: palette.purplePrimary,
@@ -54,7 +54,8 @@ const theme = createTheme({
     phone: 0,
     tablet: 768,
   },
-});
+};
 
 export type Theme = typeof theme;
+export const Text = createText<Theme>();
 export default theme;

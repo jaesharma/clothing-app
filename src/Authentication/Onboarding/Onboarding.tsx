@@ -1,9 +1,17 @@
 import React, {useRef} from "react";
-import {Dimensions, StyleSheet, View} from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  Image,
+  ImageRequireSource,
+} from "react-native";
 // import {ScrollView} from "react-native-gesture-handler";
 import Animated, {
   divide,
+  Extrapolate,
   interpolateColors,
+  interpolateNode,
   multiply,
 } from "react-native-reanimated";
 import {useScrollHandler} from "react-native-redash";
@@ -39,6 +47,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  underlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
 });
 
 const slides = [
@@ -48,7 +61,11 @@ const slides = [
     subtitle: "Find your outfits",
     description:
       "Confused about your outfits? Don't worry! Find the best outfits here!",
-    picture: Images.MODEL_1,
+    picture: {
+      src: Images.MODEL_1,
+      width: 2513,
+      height: 3583,
+    },
   },
   {
     label: "Playful",
@@ -56,7 +73,11 @@ const slides = [
     subtitle: "Hear it first, Wear it First",
     description:
       "Hating the clothes in your wardrobe? Explore hundreds of outfits ideas here.",
-    picture: Images.MODEL_2,
+    picture: {
+      src: Images.MODEL_2,
+      width: 2791,
+      height: 3744,
+    },
   },
   {
     label: "Excentric",
@@ -64,7 +85,11 @@ const slides = [
     subtitle: "Your style, Your way!",
     description:
       "Create our individual & unique style and look amazing everyday",
-    picture: Images.MODEL_3,
+    picture: {
+      src: Images.MODEL_3,
+      width: 2738,
+      height: 3244,
+    },
   },
   {
     label: "Funky",
@@ -72,11 +97,15 @@ const slides = [
     subtitle: "Look good, Feel good",
     description:
       "Wear the latest trends in fashion and explore your personality",
-    picture: Images.MODEL_4,
+    picture: {
+      src: Images.MODEL_4,
+      width: 1757,
+      height: 2551,
+    },
   },
 ];
 
-const ComponentName = () => {
+const Onboarding = props => {
   const scroll = useRef<Animated.ScrollView>(null);
   const {scrollHandler, x} = useScrollHandler();
   const inputRange = slides.map((_, index) => index * width);
@@ -88,6 +117,29 @@ const ComponentName = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.slider, {backgroundColor}]}>
+        {slides.map(({picture}, index) => {
+          const opacity = interpolateNode(x, {
+            inputRange: [
+              (index - 0.5) * width,
+              index * width,
+              (index + 0.5) * width,
+            ],
+            outputRange: [0, 1, 0],
+            extrapolate: Extrapolate.CLAMP,
+          });
+          return (
+            <Animated.View style={[styles.underlay, {opacity}]} key={index}>
+              <Image
+                source={picture.src}
+                style={{
+                  width: width - BORDER_RADIUS,
+                  height:
+                    ((width - BORDER_RADIUS) * picture.height) / picture.width,
+                }}
+              />
+            </Animated.View>
+          );
+        })}
         <Animated.ScrollView
           ref={scroll}
           horizontal
@@ -126,21 +178,27 @@ const ComponentName = () => {
                 },
               ],
             }}>
-            {slides.map(({subtitle, description}, index) => (
-              <SubSlide
-                key={index}
-                onPress={() => {
-                  if (scroll.current) {
-                    scroll.current.scrollTo({
-                      x: width * (index + 1),
-                      animated: true,
-                    });
-                  }
-                }}
-                last={index === slides.length - 1}
-                {...{subtitle, description}}
-              />
-            ))}
+            {slides.map(({subtitle, description}, index) => {
+              const last = index === slides.length - 1;
+              return (
+                <SubSlide
+                  key={index}
+                  onPress={() => {
+                    if (last) {
+                      props.navigation.navigate("Welcome");
+                    } else {
+                      if (scroll.current) {
+                        scroll.current?.scrollTo({
+                          x: width * (index + 1),
+                          animated: true,
+                        });
+                      }
+                    }
+                  }}
+                  {...{subtitle, description, last}}
+                />
+              );
+            })}
           </Animated.View>
         </View>
       </View>
@@ -148,4 +206,4 @@ const ComponentName = () => {
   );
 };
 
-export default ComponentName;
+export default Onboarding;
